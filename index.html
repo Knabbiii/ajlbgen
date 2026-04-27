@@ -466,12 +466,12 @@ function buildStatResult(rawVal, argSel) {
 
 // ── Period pills ───────────────────────────────────────────────────
 const PERIOD_INFO = {
-  alltime:  '<strong>All Time / Lifetime</strong> — zählt vom Beginn an kumulativ mit, wird <strong>niemals</strong> zurückgesetzt. Funktioniert auch für nicht-kumulative Stats (z.B. Highscores).',
-  hourly:   '<strong>Hourly</strong> — wird automatisch <strong>jede Stunde</strong> zurückgesetzt. ⚠️ Nur für kumulative Stats geeignet (z.B. Kills, Votes — nicht Highscores).',
-  daily:    '<strong>Daily</strong> — wird automatisch <strong>jeden Tag</strong> zurückgesetzt. ⚠️ Nur für kumulative Stats geeignet.',
-  weekly:   '<strong>Weekly</strong> — wird automatisch <strong>jede Woche</strong> zurückgesetzt. ⚠️ Nur für kumulative Stats geeignet.',
-  monthly:  '<strong>Monthly</strong> — wird automatisch <strong>jeden Monat</strong> zurückgesetzt. ⚠️ Nur für kumulative Stats geeignet.',
-  yearly:   '<strong>Yearly</strong> — wird automatisch <strong>jedes Jahr</strong> zurückgesetzt. ⚠️ Nur für kumulative Stats geeignet.',
+  alltime:  '<strong>All Time / Lifetime</strong> — zählt kumulativ von Anfang an mit, wird <strong>niemals</strong> zurückgesetzt. Einzige Option für nicht-kumulative Stats (z.B. Highscores).',
+  hourly:   '<strong>Hourly</strong> — Reset <strong>immer zur vollen Stunde</strong>. ⚠️ Nur für kumulative Stats (z.B. Kills, geminte Blöcke — nicht Highscores).',
+  daily:    '<strong>Daily</strong> — Reset <strong>täglich um Mitternacht</strong>. ⚠️ Nur für kumulative Stats.',
+  weekly:   '<strong>Weekly</strong> — Reset <strong>jeden Sonntag um Mitternacht</strong>. ⚠️ Nur für kumulative Stats.',
+  monthly:  '<strong>Monthly</strong> — Reset <strong>am 1. jeden Monats um Mitternacht</strong>. ⚠️ Nur für kumulative Stats.',
+  yearly:   '<strong>Yearly</strong> — Reset <strong>jährlich</strong> (am 1. Januar um Mitternacht). ⚠️ Nur für kumulative Stats.',
 };
 
 function setPeriodInfo(infoEl, period) {
