@@ -50,6 +50,8 @@
     .period-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
     .period-pill { padding: 6px 16px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); font-size: 0.88rem; cursor: pointer; transition: all 0.15s; }
     .period-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .period-info { font-size: 0.82rem; color: var(--muted); margin-top: 7px; min-height: 18px; line-height: 1.4; }
+    .period-info strong { color: var(--text); }
     /* Checkbox list */
     .cb-list { max-height: 180px; overflow-y: auto; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-top: 6px; }
     .cb-list label { display: flex; align-items: center; gap: 10px; padding: 6px 12px; margin: 0; cursor: pointer; font-size: 0.88rem; color: var(--text); border-radius: 0; transition: background 0.1s; }
@@ -181,9 +183,12 @@
     <div class="period-pills" id="lbPills">
       <span class="period-pill active" data-period="weekly">Weekly</span>
       <span class="period-pill" data-period="daily">Daily</span>
+      <span class="period-pill" data-period="hourly">Hourly</span>
       <span class="period-pill" data-period="monthly">Monthly</span>
+      <span class="period-pill" data-period="yearly">Yearly</span>
       <span class="period-pill" data-period="alltime">All Time</span>
     </div>
+    <div class="period-info" id="lbPeriodInfo"></div>
     <div class="row2">
       <div>
         <label for="topN">Number of entries (top N)</label>
@@ -287,8 +292,11 @@
       <span class="period-pill active" data-period="alltime">All Time</span>
       <span class="period-pill" data-period="weekly">Weekly</span>
       <span class="period-pill" data-period="daily">Daily</span>
+      <span class="period-pill" data-period="hourly">Hourly</span>
       <span class="period-pill" data-period="monthly">Monthly</span>
+      <span class="period-pill" data-period="yearly">Yearly</span>
     </div>
+    <div class="period-info" id="cgPeriodInfo"></div>
     <div class="row2">
       <div>
         <label for="cgLocationInput">Location</label>
@@ -457,21 +465,40 @@ function buildStatResult(rawVal, argSel) {
 }
 
 // ── Period pills ───────────────────────────────────────────────────
+const PERIOD_INFO = {
+  alltime:  '<strong>All Time / Lifetime</strong> — zählt vom Beginn an kumulativ mit, wird <strong>niemals</strong> zurückgesetzt. Funktioniert auch für nicht-kumulative Stats (z.B. Highscores).',
+  hourly:   '<strong>Hourly</strong> — wird automatisch <strong>jede Stunde</strong> zurückgesetzt. ⚠️ Nur für kumulative Stats geeignet (z.B. Kills, Votes — nicht Highscores).',
+  daily:    '<strong>Daily</strong> — wird automatisch <strong>jeden Tag</strong> zurückgesetzt. ⚠️ Nur für kumulative Stats geeignet.',
+  weekly:   '<strong>Weekly</strong> — wird automatisch <strong>jede Woche</strong> zurückgesetzt. ⚠️ Nur für kumulative Stats geeignet.',
+  monthly:  '<strong>Monthly</strong> — wird automatisch <strong>jeden Monat</strong> zurückgesetzt. ⚠️ Nur für kumulative Stats geeignet.',
+  yearly:   '<strong>Yearly</strong> — wird automatisch <strong>jedes Jahr</strong> zurückgesetzt. ⚠️ Nur für kumulative Stats geeignet.',
+};
+
+function setPeriodInfo(infoEl, period) {
+  infoEl.innerHTML = PERIOD_INFO[period] ?? '';
+}
+
+const lbPeriodInfo = document.getElementById('lbPeriodInfo');
 let selectedPeriod = 'weekly';
+setPeriodInfo(lbPeriodInfo, selectedPeriod);
 document.querySelectorAll('#lbPills .period-pill').forEach(pill => {
   pill.addEventListener('click', () => {
     document.querySelectorAll('#lbPills .period-pill').forEach(p => p.classList.remove('active'));
     pill.classList.add('active');
     selectedPeriod = pill.dataset.period;
+    setPeriodInfo(lbPeriodInfo, selectedPeriod);
   });
 });
 
+const cgPeriodInfo = document.getElementById('cgPeriodInfo');
 let selectedCGPeriod = 'alltime';
+setPeriodInfo(cgPeriodInfo, selectedCGPeriod);
 document.querySelectorAll('#cgPills .period-pill').forEach(pill => {
   pill.addEventListener('click', () => {
     document.querySelectorAll('#cgPills .period-pill').forEach(p => p.classList.remove('active'));
     pill.classList.add('active');
     selectedCGPeriod = pill.dataset.period;
+    setPeriodInfo(cgPeriodInfo, selectedCGPeriod);
   });
 });
 
