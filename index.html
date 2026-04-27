@@ -50,6 +50,13 @@
     .period-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
     .period-pill { padding: 6px 16px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); font-size: 0.88rem; cursor: pointer; transition: all 0.15s; }
     .period-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    /* Checkbox list */
+    .cb-list { max-height: 180px; overflow-y: auto; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-top: 6px; }
+    .cb-list label { display: flex; align-items: center; gap: 10px; padding: 6px 12px; margin: 0; cursor: pointer; font-size: 0.88rem; color: var(--text); border-radius: 0; transition: background 0.1s; }
+    .cb-list label:hover { background: var(--surface2); }
+    .cb-list label.hidden { display: none !important; }
+    .cb-list input[type=checkbox] { width: 15px; height: 15px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
+    .cb-count { font-size: 0.82rem; font-weight: 600; color: var(--accent); margin-top: 6px; min-height: 18px; }
   </style>
 </head>
 <body>
@@ -157,10 +164,10 @@
     <div class="sub-group hidden" id="argGroup">
       <label id="argLabel">Search for argument</label>
       <input type="text" id="argSearch" placeholder="Type to filter…" autocomplete="off" />
-      <label style="margin-top:8px;">Select value</label>
-      <select id="argSelect" size="7" multiple></select>
+      <label style="margin-top:8px;">Select value(s) — einfach anklicken, mehrere möglich</label>
+      <div class="cb-list" id="argSelect"></div>
       <p class="tip" id="argTip"></p>
-      <p class="tip" id="argCountTip" style="display:none; color: var(--accent);"></p>
+      <div class="cb-count" id="argCountTip"></div>
     </div>
   </div>
 
@@ -260,10 +267,10 @@
     <div class="sub-group hidden" id="cgArgGroup">
       <label id="cgArgLabel">Search for argument</label>
       <input type="text" id="cgArgSearch" placeholder="Type to filter…" autocomplete="off" />
-      <label style="margin-top:8px;">Select value</label>
-      <select id="cgArgSelect" size="7" multiple></select>
+      <label style="margin-top:8px;">Select value(s) — einfach anklicken, mehrere möglich</label>
+      <div class="cb-list" id="cgArgSelect"></div>
       <p class="tip" id="cgArgTip"></p>
-      <p class="tip" id="cgArgCountTip" style="display:none; color: var(--accent);"></p>
+      <div class="cb-count" id="cgArgCountTip"></div>
     </div>
   </div>
 
@@ -332,13 +339,7 @@ statSearch.addEventListener('input', () => filterSelect(statSelect, statSearch.v
 statSelect.addEventListener('change', () => handleArgGroup(statSelect.value, argGroup, argLabel, argSearch, argSelect, argTip));
 argSearch.addEventListener('input', () => {
   const list = argType(statSelect.value) === 'material' ? MATERIALS : MOB_TYPES;
-  populateArgSelect(argSelect, list, argSearch.value);
-});
-argSelect.addEventListener('change', () => {
-  const n = argSelect.selectedOptions.length;
-  const ct = document.getElementById('argCountTip');
-  if(n > 1) { ct.style.display = ''; ct.textContent = `${n} selected — will use Math PAPI expansion to combine`; }
-  else { ct.style.display = 'none'; }
+  filterCbList(argSelect, argSearch.value);
 });
 
 // ── Community goal stat selector ───────────────────────────────────
@@ -353,14 +354,7 @@ const cgArgTip     = document.getElementById('cgArgTip');
 cgStatSearch.addEventListener('input', () => filterSelect(cgStatSelect, cgStatSearch.value));
 cgStatSelect.addEventListener('change', () => handleArgGroup(cgStatSelect.value, cgArgGroup, cgArgLabel, cgArgSearch, cgArgSelect, cgArgTip));
 cgArgSearch.addEventListener('input', () => {
-  const list = argType(cgStatSelect.value) === 'material' ? MATERIALS : MOB_TYPES;
-  populateArgSelect(cgArgSelect, list, cgArgSearch.value);
-});
-cgArgSelect.addEventListener('change', () => {
-  const n = cgArgSelect.selectedOptions.length;
-  const ct = document.getElementById('cgArgCountTip');
-  if(n > 1) { ct.style.display = ''; ct.textContent = `${n} selected — will use Math PAPI expansion to combine`; }
-  else { ct.style.display = 'none'; }
+  filterCbList(cgArgSelect, cgArgSearch.value);
 });
 
 // ── Shared helpers ─────────────────────────────────────────────────
@@ -381,13 +375,13 @@ function handleArgGroup(val, grp, lbl, srch, sel, tip) {
   if(needsArg(val)) {
     const type = argType(val);
     if(type === 'material') {
-      lbl.textContent = 'Search material / block / item (MC 1.21) — hold Ctrl/Cmd for multiple';
-      tip.textContent = 'e.g. STONE, OAK_LOG — select 2+ to combine via Math PAPI expansion';
-      populateArgSelect(sel, MATERIALS, '');
+      lbl.textContent = 'Material / Block / Item (MC 1.21) — mehrere anklicken';
+      tip.textContent = 'Suche oben, dann anklicken. 2+ ergeben einen kombinierten Placeholder (Math Expansion).';
+      populateCbList(sel, MATERIALS);
     } else {
-      lbl.textContent = 'Search mob type — hold Ctrl/Cmd for multiple';
-      tip.textContent = 'e.g. ZOMBIE, CREEPER — select 2+ to combine via Math PAPI expansion';
-      populateArgSelect(sel, MOB_TYPES, '');
+      lbl.textContent = 'Mob Type — mehrere anklicken';
+      tip.textContent = 'Suche oben, dann anklicken. 2+ ergeben einen kombinierten Placeholder (Math Expansion).';
+      populateCbList(sel, MOB_TYPES);
     }
     srch.value = '';
     grp.classList.remove('hidden');
@@ -396,22 +390,47 @@ function handleArgGroup(val, grp, lbl, srch, sel, tip) {
   }
 }
 
-function populateArgSelect(sel, list, filter) {
-  const f = filter.toLowerCase();
-  sel.innerHTML = '';
+function populateCbList(container, list) {
+  const uid = container.id;
+  container.innerHTML = '';
   list.forEach(item => {
-    if(!f || item.toLowerCase().includes(f)) {
-      const opt = document.createElement('option');
-      opt.value = item; opt.textContent = item;
-      sel.appendChild(opt);
-    }
+    const lbl = document.createElement('label');
+    const cb  = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = item;
+    cb.addEventListener('change', () => updateCbCount(container));
+    lbl.appendChild(cb);
+    lbl.appendChild(document.createTextNode(item));
+    container.appendChild(lbl);
   });
+}
+
+function filterCbList(container, query) {
+  const q = query.toLowerCase();
+  container.querySelectorAll('label').forEach(lbl => {
+    const val = lbl.querySelector('input').value.toLowerCase();
+    lbl.classList.toggle('hidden', q !== '' && !val.includes(q));
+  });
+}
+
+function updateCbCount(container) {
+  const n = getCheckedValues(container).length;
+  const ct = document.getElementById(container.id + 'Tip') ??
+             document.getElementById(container.id === 'argSelect' ? 'argCountTip' : 'cgArgCountTip');
+  const countEl = document.getElementById(container.id === 'argSelect' ? 'argCountTip' : 'cgArgCountTip');
+  if(n === 0) countEl.textContent = '';
+  else if(n === 1) countEl.textContent = '1 ausgewählt';
+  else countEl.textContent = `${n} ausgewählt — werden via Math Expansion kombiniert`;
+}
+
+function getCheckedValues(container) {
+  return Array.from(container.querySelectorAll('input[type=checkbox]:checked')).map(cb => cb.value);
 }
 
 // Returns { boardName, addCmd, isMulti } or null
 function buildStatResult(rawVal, argSel) {
   if(needsArg(rawVal)) {
-    const selected = Array.from(argSel.selectedOptions).map(o => o.value);
+    const selected = getCheckedValues(argSel);
     if(!selected.length) return null;
     const base = rawVal.split(':')[0]; // e.g. 'mine_block'
     if(selected.length === 1) {
