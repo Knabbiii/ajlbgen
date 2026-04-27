@@ -158,8 +158,9 @@
       <label id="argLabel">Search for argument</label>
       <input type="text" id="argSearch" placeholder="Type to filter…" autocomplete="off" />
       <label style="margin-top:8px;">Select value</label>
-      <select id="argSelect" size="7"></select>
+      <select id="argSelect" size="7" multiple></select>
       <p class="tip" id="argTip"></p>
+      <p class="tip" id="argCountTip" style="display:none; color: var(--accent);"></p>
     </div>
   </div>
 
@@ -260,8 +261,9 @@
       <label id="cgArgLabel">Search for argument</label>
       <input type="text" id="cgArgSearch" placeholder="Type to filter…" autocomplete="off" />
       <label style="margin-top:8px;">Select value</label>
-      <select id="cgArgSelect" size="7"></select>
+      <select id="cgArgSelect" size="7" multiple></select>
       <p class="tip" id="cgArgTip"></p>
+      <p class="tip" id="cgArgCountTip" style="display:none; color: var(--accent);"></p>
     </div>
   </div>
 
@@ -332,6 +334,12 @@ argSearch.addEventListener('input', () => {
   const list = argType(statSelect.value) === 'material' ? MATERIALS : MOB_TYPES;
   populateArgSelect(argSelect, list, argSearch.value);
 });
+argSelect.addEventListener('change', () => {
+  const n = argSelect.selectedOptions.length;
+  const ct = document.getElementById('argCountTip');
+  if(n > 1) { ct.style.display = ''; ct.textContent = `${n} selected — will use Math PAPI expansion to combine`; }
+  else { ct.style.display = 'none'; }
+});
 
 // ── Community goal stat selector ───────────────────────────────────
 const cgStatSearch = document.getElementById('cgStatSearch');
@@ -347,6 +355,12 @@ cgStatSelect.addEventListener('change', () => handleArgGroup(cgStatSelect.value,
 cgArgSearch.addEventListener('input', () => {
   const list = argType(cgStatSelect.value) === 'material' ? MATERIALS : MOB_TYPES;
   populateArgSelect(cgArgSelect, list, cgArgSearch.value);
+});
+cgArgSelect.addEventListener('change', () => {
+  const n = cgArgSelect.selectedOptions.length;
+  const ct = document.getElementById('cgArgCountTip');
+  if(n > 1) { ct.style.display = ''; ct.textContent = `${n} selected — will use Math PAPI expansion to combine`; }
+  else { ct.style.display = 'none'; }
 });
 
 // ── Shared helpers ─────────────────────────────────────────────────
@@ -367,12 +381,12 @@ function handleArgGroup(val, grp, lbl, srch, sel, tip) {
   if(needsArg(val)) {
     const type = argType(val);
     if(type === 'material') {
-      lbl.textContent = 'Search material / block / item (MC 1.21)';
-      tip.textContent = 'e.g. STONE, OAK_LOG, DIAMOND_SWORD';
+      lbl.textContent = 'Search material / block / item (MC 1.21) — hold Ctrl/Cmd for multiple';
+      tip.textContent = 'e.g. STONE, OAK_LOG — select 2+ to combine via Math PAPI expansion';
       populateArgSelect(sel, MATERIALS, '');
     } else {
-      lbl.textContent = 'Search mob type';
-      tip.textContent = 'e.g. ZOMBIE, CREEPER, ENDERMAN';
+      lbl.textContent = 'Search mob type — hold Ctrl/Cmd for multiple';
+      tip.textContent = 'e.g. ZOMBIE, CREEPER — select 2+ to combine via Math PAPI expansion';
       populateArgSelect(sel, MOB_TYPES, '');
     }
     srch.value = '';
@@ -394,13 +408,33 @@ function populateArgSelect(sel, list, filter) {
   });
 }
 
-function buildStatKey(rawVal, argSel) {
+// Returns { boardName, addCmd, isMulti } or null
+function buildStatResult(rawVal, argSel) {
   if(needsArg(rawVal)) {
-    const arg = argSel.value;
-    if(!arg) return null;
-    return rawVal.split(':')[0] + '_' + arg;
+    const selected = Array.from(argSel.selectedOptions).map(o => o.value);
+    if(!selected.length) return null;
+    const base = rawVal.split(':')[0]; // e.g. 'mine_block'
+    if(selected.length === 1) {
+      return {
+        boardName: 'statistic_' + base + '_' + selected[0],
+        addCmd: '%statistic_' + base + ':' + selected[0] + '%',
+        isMulti: false
+      };
+    }
+    // Multiple → Math PAPI expansion
+    const inner = selected.map(m => '{statistic_' + base + ':' + m + '}').join('+');
+    return {
+      boardName: 'math_' + inner,
+      addCmd: '%math_' + inner + '%',
+      isMulti: true,
+      materials: selected
+    };
   }
-  return rawVal;
+  return {
+    boardName: 'statistic_' + rawVal,
+    addCmd: '%statistic_' + rawVal + '%',
+    isMulti: false
+  };
 }
 
 // ── Period pills ───────────────────────────────────────────────────
@@ -437,8 +471,21 @@ function generate() {
   const output   = document.getElementById('output');
 
   if(!rawVal) { output.value = '# Please select a statistic first.'; return; }
-  const statKey = buildStatKey(rawVal, argSelect);
-  if(!statKey) { output.value = '# Please select a material / mob type first.'; return; }
+  const res = buildStatResult(rawVal, argSelect);
+  if(!res) { output.value = '# Please select a material / mob type first.'; return; }
+  const { boardName, addCmd, isMulti } = res;
+
+  const header = [];
+  header.push('# ─────────────────────────────────────────');
+  header.push('# Run in-game to register the board:');
+  header.push(`# /ajlb add ${addCmd}`);
+  if(isMulti) {
+    header.push('#');
+    header.push('# ⚠ Requires PAPI Math expansion:');
+    header.push('# /papi ecloud download Math');
+    header.push('# /papi reload');
+  }
+  header.push('# ─────────────────────────────────────────');
 
   const lines = [];
   lines.push(`  - content: '&6&l${title}'`);
@@ -448,10 +495,10 @@ function generate() {
   for(let i = 1; i <= topN; i++) {
     const prefix = i === 1 ? '&e#1' : `&f#${i}`;
     const nc = i === 1 ? '&c' : '';
-    lines.push(`  - content: '${prefix} ${nc}%ajlb_lb_statistic_${statKey}_${i}_${selectedPeriod}_name% &7- &f%ajlb_lb_statistic_${statKey}_${i}_${selectedPeriod}_value%'`);
+    lines.push(`  - content: '${prefix} ${nc}%ajlb_lb_${boardName}_${i}_${selectedPeriod}_name% &7- &f%ajlb_lb_${boardName}_${i}_${selectedPeriod}_value%'`);
     lines.push(`    height: 0.3`);
   }
-  output.value = yamlHeader(location) + '\n' + lines.join('\n');
+  output.value = header.join('\n') + '\n\n' + yamlHeader(location) + '\n' + lines.join('\n');
 }
 
 // ── Community goal generate ────────────────────────────────────────
@@ -464,11 +511,24 @@ function generateCG() {
   const output   = document.getElementById('cgOutput');
 
   if(!rawVal) { output.value = '# Please select a statistic first.'; return; }
-  const statKey = buildStatKey(rawVal, cgArgSelect);
-  if(!statKey) { output.value = '# Please select a material / mob type first.'; return; }
+  const res = buildStatResult(rawVal, cgArgSelect);
+  if(!res) { output.value = '# Please select a material / mob type first.'; return; }
+  const { boardName, addCmd, isMulti } = res;
 
   const goalFmt = goalVal.toLocaleString('en-US');
-  const totalPH = `%ajlb_total_statistic_${statKey}_${selectedCGPeriod}_formatted%`;
+  const totalPH = `%ajlb_total_${boardName}_${selectedCGPeriod}_formatted%`;
+
+  const header = [];
+  header.push('# ─────────────────────────────────────────');
+  header.push('# Run in-game to register the board:');
+  header.push(`# /ajlb add ${addCmd}`);
+  if(isMulti) {
+    header.push('#');
+    header.push('# ⚠ Requires PAPI Math expansion:');
+    header.push('# /papi ecloud download Math');
+    header.push('# /papi reload');
+  }
+  header.push('# ─────────────────────────────────────────');
 
   const lines = [];
   lines.push(`  - content: '&6&l${title}'`);
@@ -480,7 +540,7 @@ function generateCG() {
   lines.push(`  - content: '&7Progress: &a${totalPH} &7/ &f${goalFmt}'`);
   lines.push(`    height: 0.3`);
 
-  output.value = yamlHeader(location) + '\n' + lines.join('\n');
+  output.value = header.join('\n') + '\n\n' + yamlHeader(location) + '\n' + lines.join('\n');
 }
 
 // ── Copy ───────────────────────────────────────────────────────────
