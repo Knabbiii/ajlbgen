@@ -59,6 +59,25 @@
     .cb-list label.hidden { display: none !important; }
     .cb-list input[type=checkbox] { width: 15px; height: 15px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
     .cb-count { font-size: 0.82rem; font-weight: 600; color: var(--accent); margin-top: 6px; min-height: 18px; }
+    /* Location row */
+    .loc-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 6px; }
+    .loc-row > div { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; }
+    .loc-row input { background: transparent; border: none; padding: 0; flex: 1; min-width: 0; }
+    .loc-row input:focus { border: none; outline: none; }
+    .loc-label { font-size: 0.8rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    /* Steps */
+    .steps { display: flex; flex-direction: column; gap: 14px; }
+    .step { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 18px; }
+    .step-header { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .step-num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .step p { font-size: 0.88rem; color: var(--muted); margin-bottom: 8px; line-height: 1.5; }
+    .step p:last-child { margin-bottom: 0; }
+    .step p strong { color: var(--text); }
+    .code-block { position: relative; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 48px 10px 14px; font-family: 'Consolas','Courier New',monospace; font-size: 0.85rem; color: var(--success); word-break: break-all; white-space: pre-wrap; margin-top: 6px; }
+    .code-block .copy-btn { position: absolute; top: 6px; right: 6px; }
+    .warn-box { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.3); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 0.84rem; color: #fbbf24; margin-top: 8px; line-height: 1.5; }
+    .warn-box strong { color: #fde68a; }
+    .info-box { background: rgba(124,111,247,0.08); border: 1px solid rgba(124,111,247,0.3); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 0.84rem; color: #a5b4fc; margin-top: 8px; line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -189,22 +208,25 @@
       <span class="period-pill" data-period="alltime">All Time</span>
     </div>
     <div class="period-info" id="lbPeriodInfo"></div>
-    <div class="row2">
+    <div class="row2" style="margin-top:16px;">
       <div>
         <label for="topN">Number of entries (top N)</label>
         <input type="text" id="topN" value="3" placeholder="3" />
       </div>
-      <div>
-        <label for="locationInput">Location</label>
-        <input type="text" id="locationInput" placeholder="world:-1571,250:228,300:1440,750" value="world:-1571,250:228,300:1440,750" />
-      </div>
+    </div>
+    <label>Hologram Location <span style="color:var(--muted);font-weight:400">(Welt ist immer <code>world</code>)</span></label>
+    <div class="loc-row">
+      <div><span class="loc-label">X</span><input type="text" id="locX" placeholder="-1571.25" /></div>
+      <div><span class="loc-label">Y</span><input type="text" id="locY" placeholder="228.3" /></div>
+      <div><span class="loc-label">Z</span><input type="text" id="locZ" placeholder="1440.75" /></div>
     </div>
   </div>
 
   <div class="card">
-    <h2>3 · Generated YAML <span class="badge">COPY READY</span></h2>
-    <div class="output-wrap">
-      <textarea id="output" class="output-area" readonly placeholder="Your YAML will appear here after clicking Generate…"></textarea>
+    <h2>3 · Setup-Anleitung &amp; YAML <span class="badge">COPY READY</span></h2>
+    <div class="steps" id="lbSteps" style="margin-bottom:16px;"></div>
+    <div class="output-wrap" style="margin-top:8px;">
+      <textarea id="output" class="output-area" readonly placeholder="Klicke Generate um den YAML-Code zu erzeugen…"></textarea>
       <button class="copy-btn" onclick="copyOutput('output', this)">Copy</button>
     </div>
     <button class="primary" onclick="generate()">Generate</button>
@@ -297,19 +319,19 @@
       <span class="period-pill" data-period="yearly">Yearly</span>
     </div>
     <div class="period-info" id="cgPeriodInfo"></div>
-    <div class="row2">
-      <div>
-        <label for="cgLocationInput">Location</label>
-        <input type="text" id="cgLocationInput" placeholder="world:-1571,250:228,300:1440,750" value="world:-1571,250:228,300:1440,750" />
-      </div>
+    <label>Hologram Location <span style="color:var(--muted);font-weight:400">(Welt ist immer <code>world</code>)</span></label>
+    <div class="loc-row">
+      <div><span class="loc-label">X</span><input type="text" id="cgLocX" placeholder="-1923.92" /></div>
+      <div><span class="loc-label">Y</span><input type="text" id="cgLocY" placeholder="64.0" /></div>
+      <div><span class="loc-label">Z</span><input type="text" id="cgLocZ" placeholder="-229.0" /></div>
     </div>
   </div>
 
   <div class="card">
-    <h2>3 · Generated YAML <span class="badge">COPY READY</span></h2>
-    <p class="tip" style="margin-bottom:12px;">Uses <code>%ajlb_total_statistic_...%</code> placeholders (sum of all players). The goal value is static text — update it manually when you change the goal.</p>
-    <div class="output-wrap">
-      <textarea id="cgOutput" class="output-area" readonly placeholder="Your YAML will appear here after clicking Generate…"></textarea>
+    <h2>3 · Setup-Anleitung &amp; YAML <span class="badge">COPY READY</span></h2>
+    <div class="steps" id="cgSteps" style="margin-bottom:16px;"></div>
+    <div class="output-wrap" style="margin-top:8px;">
+      <textarea id="cgOutput" class="output-area" readonly placeholder="Klicke Generate um den YAML-Code zu erzeugen…"></textarea>
       <button class="copy-btn" onclick="copyOutput('cgOutput', this)">Copy</button>
     </div>
     <button class="primary" onclick="generateCG()">Generate</button>
@@ -502,9 +524,83 @@ document.querySelectorAll('#cgPills .period-pill').forEach(pill => {
   });
 });
 
+// ── Location helper ────────────────────────────────────────────────
+function parseCoord(val) {
+  if(!val || val.trim() === '') return '0';
+  // replace comma used as decimal separator (e.g. 1571,25 → 1571.25)
+  // but NOT thousands separators — if there are multiple commas, only last treated as decimal
+  // Strategy: replace all commas with dots, then if more than one dot keep as-is
+  let s = val.trim().replace(/,/g, '.');
+  // if multiple dots, remove all but last
+  const dots = s.split('.').length - 1;
+  if(dots > 1) {
+    const parts = s.split('.');
+    const last = parts.pop();
+    s = parts.join('') + '.' + last;
+  }
+  return s;
+}
+
+function buildLocation(xId, yId, zId) {
+  const x = parseCoord(document.getElementById(xId).value);
+  const y = parseCoord(document.getElementById(yId).value);
+  const z = parseCoord(document.getElementById(zId).value);
+  // DecentHolograms format: world:X,Y:Y,Z  (uses comma as decimal, colon as separator)
+  // Actually format is  world:X.XXX:Y.YYY:Z.ZZZ  — colons between coords
+  return `world:${x}:${y}:${z}`;
+}
+
 // ── YAML header helper ─────────────────────────────────────────────
 function yamlHeader(location) {
   return `location: ${location}\nenabled: true\ndisplay-range: 48\nupdate-range: 48\nupdate-interval: 20\nfacing: 0.0\ndown-origin: false\npages:\n- lines:`;
+}
+
+// ── Code block helper for steps ────────────────────────────────────
+function codeBlock(id, text) {
+  return `<div class="code-block" id="${id}">${escHtml(text)}<button class="copy-btn" onclick="copyCode('${id}',this)">Copy</button></div>`;
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function copyCode(id, btn) {
+  const el = document.getElementById(id);
+  // text is everything minus the button text
+  const text = el.childNodes[0].textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1800);
+  });
+}
+
+// ── Shortcut name helper ───────────────────────────────────────────
+function makeShortcutName(rawVal, selected) {
+  if(!selected || !selected.length) {
+    return rawVal.replace(/[^a-z0-9_]/gi, '_').toLowerCase();
+  }
+  if(selected.length === 1) {
+    return (rawVal.split(':')[0] + '_' + selected[0]).toLowerCase();
+  }
+  // Multiple: use stat base + count or abbreviated
+  const base = rawVal.split(':')[0].toLowerCase();
+  return base + '_multi_' + selected.length;
+}
+
+// ── PAPI ecloud note ───────────────────────────────────────────────
+// Stats that need a specific ecloud expansion
+function ecloudNote(rawVal, isMulti) {
+  const notes = [];
+  if(rawVal.startsWith('statistic_') || !rawVal.includes(':')) {
+    // statistic expansion is bundled with PAPI by default — no download needed usually
+    // but some servers need it explicitly
+  }
+  if(isMulti) {
+    notes.push('<div class="warn-box"><strong>⚠ PAPI Math Expansion</strong> wird benötigt:<br>' +
+      '<code>/papi ecloud download Math</code><br><code>/papi reload</code></div>');
+  }
+  // Statistic expansion note
+  notes.push('<div class="info-box"><strong>ℹ PAPI Statistic Expansion</strong>: Stelle sicher, dass die Statistic-Expansion installiert ist:<br>' +
+    '<code>/papi ecloud download Statistic</code> &nbsp;→&nbsp; <code>/papi reload</code></div>');
+  return notes.join('');
 }
 
 // ── Leaderboard generate ───────────────────────────────────────────
@@ -513,26 +609,23 @@ function generate() {
   const title    = document.getElementById('titleInput').value || 'Weekly Advancements';
   const category = document.getElementById('categoryInput').value || 'Most Mobs Killed';
   const topN     = Math.max(1, parseInt(document.getElementById('topN').value) || 3);
-  const location = document.getElementById('locationInput').value || 'world:0,64:0,0:0,0';
+  const location = buildLocation('locX','locY','locZ');
   const output   = document.getElementById('output');
+  const stepsEl  = document.getElementById('lbSteps');
 
-  if(!rawVal) { output.value = '# Please select a statistic first.'; return; }
+  if(!rawVal) { output.value = '# Please select a statistic first.'; stepsEl.innerHTML=''; return; }
   const res = buildStatResult(rawVal, argSelect);
-  if(!res) { output.value = '# Please select a material / mob type first.'; return; }
-  const { boardName, addCmd, isMulti } = res;
+  if(!res) { output.value = '# Please select a material / mob type first.'; stepsEl.innerHTML=''; return; }
+  const { boardName, addCmd, isMulti, materials } = res;
 
-  const header = [];
-  header.push('# ─────────────────────────────────────────');
-  header.push('# Run in-game to register the board:');
-  header.push(`# /ajlb add ${addCmd}`);
-  if(isMulti) {
-    header.push('#');
-    header.push('# ⚠ Requires PAPI Math expansion:');
-    header.push('# /papi ecloud download Math');
-    header.push('# /papi reload');
-  }
-  header.push('# ─────────────────────────────────────────');
+  // --- Shortcut
+  const selected = materials || (needsArg(rawVal) ? getCheckedValues(argSelect) : []);
+  const shortcutName = makeShortcutName(rawVal, selected);
+  const shortcutContent = addCmd; // the full placeholder goes in the shortcut file
+  const shortcutAddCmd  = `/ajlb add %shortcut_${shortcutName}%`;
+  const boardRef        = `shortcut_${shortcutName}`;
 
+  // --- YAML lines
   const lines = [];
   lines.push(`  - content: '&6&l${title}'`);
   lines.push(`    height: 0.4`);
@@ -541,10 +634,45 @@ function generate() {
   for(let i = 1; i <= topN; i++) {
     const prefix = i === 1 ? '&e#1' : `&f#${i}`;
     const nc = i === 1 ? '&c' : '';
-    lines.push(`  - content: '${prefix} ${nc}%ajlb_lb_${boardName}_${i}_${selectedPeriod}_name% &7- &f%ajlb_lb_${boardName}_${i}_${selectedPeriod}_value%'`);
+    lines.push(`  - content: '${prefix} ${nc}%ajlb_lb_${boardRef}_${i}_${selectedPeriod}_name% &7- &f%ajlb_lb_${boardRef}_${i}_${selectedPeriod}_value%'`);
     lines.push(`    height: 0.3`);
   }
-  output.value = header.join('\n') + '\n\n' + yamlHeader(location) + '\n' + lines.join('\n');
+  const yaml = yamlHeader(location) + '\n' + lines.join('\n');
+  output.value = yaml;
+
+  // --- Build steps HTML
+  let steps = `<div class="steps">`;
+
+  // Step 1 – PAPI setup
+  steps += `<div class="step">
+    <div class="step-header"><span class="step-num">1</span> PAPI Expansions installieren</div>
+    ${ecloudNote(rawVal, isMulti)}
+  </div>`;
+
+  // Step 2 – Create shortcut file
+  steps += `<div class="step">
+    <div class="step-header"><span class="step-num">2</span> Shortcut-Datei erstellen</div>
+    <p>Erstelle die Datei <strong>/plugins/PlaceholderAPI/shortcuts/${shortcutName}.txt</strong> auf deinem Server und füge diesen Inhalt ein:</p>
+    ${codeBlock('lb-shortcut-content', shortcutContent)}
+    <p style="margin-top:8px;">Danach PAPI neu laden:</p>
+    ${codeBlock('lb-papi-reload', '/papi reload')}
+  </div>`;
+
+  // Step 3 – Register board
+  steps += `<div class="step">
+    <div class="step-header"><span class="step-num">3</span> Board registrieren</div>
+    <p>Führe <strong>im Spiel</strong> aus:</p>
+    ${codeBlock('lb-ajlb-add', shortcutAddCmd)}
+  </div>`;
+
+  // Step 4 – Create hologram
+  steps += `<div class="step">
+    <div class="step-header"><span class="step-num">4</span> Hologram erstellen (DecentHolograms)</div>
+    <p>Kopiere den YAML unten in deine DecentHolograms-Config. Oder erstelle ein Hologram mit <code>/dh create &lt;name&gt;</code> und ersetze dann den Inhalt mit dem generierten YAML.</p>
+  </div>`;
+
+  steps += `</div>`;
+  stepsEl.innerHTML = steps;
 }
 
 // ── Community goal generate ────────────────────────────────────────
@@ -552,29 +680,24 @@ function generateCG() {
   const rawVal   = cgStatSelect.value;
   const title    = document.getElementById('cgTitleInput').value || 'Community Goal';
   const desc     = document.getElementById('cgDescInput').value || '';
-  const goalVal  = parseInt(document.getElementById('cgGoalValue').value) || 1000;
-  const location = document.getElementById('cgLocationInput').value || 'world:0,64:0,0:0,0';
+  const goalVal  = document.getElementById('cgGoalValue').value || '1000';
+  const location = buildLocation('cgLocX','cgLocY','cgLocZ');
   const output   = document.getElementById('cgOutput');
+  const stepsEl  = document.getElementById('cgSteps');
 
-  if(!rawVal) { output.value = '# Please select a statistic first.'; return; }
+  if(!rawVal) { output.value = '# Please select a statistic first.'; stepsEl.innerHTML=''; return; }
   const res = buildStatResult(rawVal, cgArgSelect);
-  if(!res) { output.value = '# Please select a material / mob type first.'; return; }
-  const { boardName, addCmd, isMulti } = res;
+  if(!res) { output.value = '# Please select a material / mob type first.'; stepsEl.innerHTML=''; return; }
+  const { boardName, addCmd, isMulti, materials } = res;
 
-  const goalFmt = goalVal.toLocaleString('en-US');
-  const totalPH = `%ajlb_total_${boardName}_${selectedCGPeriod}_formatted%`;
+  const selected = materials || (needsArg(rawVal) ? getCheckedValues(cgArgSelect) : []);
+  const shortcutName    = makeShortcutName(rawVal, selected);
+  const shortcutContent = addCmd;
+  const shortcutAddCmd  = `/ajlb add %shortcut_${shortcutName}%`;
+  const boardRef        = `shortcut_${shortcutName}`;
 
-  const header = [];
-  header.push('# ─────────────────────────────────────────');
-  header.push('# Run in-game to register the board:');
-  header.push(`# /ajlb add ${addCmd}`);
-  if(isMulti) {
-    header.push('#');
-    header.push('# ⚠ Requires PAPI Math expansion:');
-    header.push('# /papi ecloud download Math');
-    header.push('# /papi reload');
-  }
-  header.push('# ─────────────────────────────────────────');
+  const goalFmt  = Number(goalVal.replace(/[^0-9.]/g,'')).toLocaleString('en-US') || goalVal;
+  const totalPH  = `%ajlb_total_${boardRef}_${selectedCGPeriod}_formatted%`;
 
   const lines = [];
   lines.push(`  - content: '&6&l${title}'`);
@@ -586,7 +709,37 @@ function generateCG() {
   lines.push(`  - content: '&7Progress: &a${totalPH} &7/ &f${goalFmt}'`);
   lines.push(`    height: 0.3`);
 
-  output.value = header.join('\n') + '\n\n' + yamlHeader(location) + '\n' + lines.join('\n');
+  output.value = yamlHeader(location) + '\n' + lines.join('\n');
+
+  // --- Build steps
+  let steps = `<div class="steps">`;
+
+  steps += `<div class="step">
+    <div class="step-header"><span class="step-num">1</span> PAPI Expansions installieren</div>
+    ${ecloudNote(rawVal, isMulti)}
+  </div>`;
+
+  steps += `<div class="step">
+    <div class="step-header"><span class="step-num">2</span> Shortcut-Datei erstellen</div>
+    <p>Erstelle <strong>/plugins/PlaceholderAPI/shortcuts/${shortcutName}.txt</strong> und füge ein:</p>
+    ${codeBlock('cg-shortcut-content', shortcutContent)}
+    <p style="margin-top:8px;">Danach:</p>
+    ${codeBlock('cg-papi-reload', '/papi reload')}
+  </div>`;
+
+  steps += `<div class="step">
+    <div class="step-header"><span class="step-num">3</span> Board registrieren</div>
+    <p>Führe <strong>im Spiel</strong> aus:</p>
+    ${codeBlock('cg-ajlb-add', shortcutAddCmd)}
+  </div>`;
+
+  steps += `<div class="step">
+    <div class="step-header"><span class="step-num">4</span> Hologram erstellen (DecentHolograms)</div>
+    <p>Kopiere den YAML unten in deine DecentHolograms-Config. Der <code>${totalPH}</code> Placeholder zeigt die Summe aller Spieler. Aktualisiere den Zielwert (<strong>${goalFmt}</strong>) manuell wenn sich das Ziel ändert.</p>
+  </div>`;
+
+  steps += `</div>`;
+  stepsEl.innerHTML = steps;
 }
 
 // ── Copy ───────────────────────────────────────────────────────────
