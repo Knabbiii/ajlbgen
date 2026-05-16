@@ -643,31 +643,25 @@ function generate() {
   // --- Build steps HTML
   let steps = `<div class="steps">`;
 
-  // Step 1 – PAPI setup
+  // Step 1 – Create shortcut file
   steps += `<div class="step">
-    <div class="step-header"><span class="step-num">1</span> PAPI Expansions installieren</div>
-    ${ecloudNote(rawVal, isMulti)}
-  </div>`;
-
-  // Step 2 – Create shortcut file
-  steps += `<div class="step">
-    <div class="step-header"><span class="step-num">2</span> Shortcut-Datei erstellen</div>
+    <div class="step-header"><span class="step-num">1</span> Shortcut-Datei erstellen</div>
     <p>Erstelle die Datei <strong>/plugins/PlaceholderAPI/shortcuts/${shortcutName}.txt</strong> auf deinem Server und füge diesen Inhalt ein:</p>
     ${codeBlock('lb-shortcut-content', shortcutContent)}
     <p style="margin-top:8px;">Danach PAPI neu laden:</p>
     ${codeBlock('lb-papi-reload', '/papi reload')}
   </div>`;
 
-  // Step 3 – Register board
+  // Step 2 – Register board
   steps += `<div class="step">
-    <div class="step-header"><span class="step-num">3</span> Board registrieren</div>
+    <div class="step-header"><span class="step-num">2</span> Board registrieren</div>
     <p>Führe <strong>im Spiel</strong> aus:</p>
     ${codeBlock('lb-ajlb-add', shortcutAddCmd)}
   </div>`;
 
-  // Step 4 – Create hologram
+  // Step 3 – Create hologram
   steps += `<div class="step">
-    <div class="step-header"><span class="step-num">4</span> Hologram erstellen (DecentHolograms)</div>
+    <div class="step-header"><span class="step-num">3</span> Hologram erstellen (DecentHolograms)</div>
     <p>Kopiere den YAML unten in deine DecentHolograms-Config. Oder erstelle ein Hologram mit <code>/dh create &lt;name&gt;</code> und ersetze dann den Inhalt mit dem generierten YAML.</p>
   </div>`;
 
@@ -715,12 +709,7 @@ function generateCG() {
   let steps = `<div class="steps">`;
 
   steps += `<div class="step">
-    <div class="step-header"><span class="step-num">1</span> PAPI Expansions installieren</div>
-    ${ecloudNote(rawVal, isMulti)}
-  </div>`;
-
-  steps += `<div class="step">
-    <div class="step-header"><span class="step-num">2</span> Shortcut-Datei erstellen</div>
+    <div class="step-header"><span class="step-num">1</span> Shortcut-Datei erstellen</div>
     <p>Erstelle <strong>/plugins/PlaceholderAPI/shortcuts/${shortcutName}.txt</strong> und füge ein:</p>
     ${codeBlock('cg-shortcut-content', shortcutContent)}
     <p style="margin-top:8px;">Danach:</p>
@@ -728,14 +717,15 @@ function generateCG() {
   </div>`;
 
   steps += `<div class="step">
-    <div class="step-header"><span class="step-num">3</span> Board registrieren</div>
+    <div class="step-header"><span class="step-num">2</span> Board registrieren</div>
     <p>Führe <strong>im Spiel</strong> aus:</p>
     ${codeBlock('cg-ajlb-add', shortcutAddCmd)}
   </div>`;
 
   steps += `<div class="step">
-    <div class="step-header"><span class="step-num">4</span> Hologram erstellen (DecentHolograms)</div>
-    <p>Kopiere den YAML unten in deine DecentHolograms-Config. Der <code>${totalPH}</code> Placeholder zeigt die Summe aller Spieler. Aktualisiere den Zielwert (<strong>${goalFmt}</strong>) manuell wenn sich das Ziel ändert.</p>
+    <div class="step-header"><span class="step-num">3</span> Community Goal Hologram eintragen</div>
+    <p>Füge den YAML unten in die Datei <strong>/plugins/DecentHolograms/holograms/communityGoal.yml</strong> ein und lade danach DecentHolograms neu (<code>/dh reload</code>).</p>
+    <p>Der Placeholder <code>${totalPH}</code> zeigt die Summe aller Spieler automatisch an. Den Zielwert (<strong>${goalFmt}</strong>) musst du manuell anpassen wenn sich das Ziel ändert.</p>
   </div>`;
 
   steps += `</div>`;
