@@ -198,27 +198,10 @@
     <input type="text" id="titleInput" placeholder="e.g. Weekly Advancements" value="Weekly Advancements" />
     <label for="categoryInput">Category label</label>
     <input type="text" id="categoryInput" placeholder="e.g. Most Mobs Killed" value="Most Mobs Killed" />
-    <label>Time period</label>
-    <div class="period-pills" id="lbPills">
-      <span class="period-pill active" data-period="weekly">Weekly</span>
-      <span class="period-pill" data-period="daily">Daily</span>
-      <span class="period-pill" data-period="hourly">Hourly</span>
-      <span class="period-pill" data-period="monthly">Monthly</span>
-      <span class="period-pill" data-period="yearly">Yearly</span>
-      <span class="period-pill" data-period="alltime">All Time</span>
-    </div>
-    <div class="period-info" id="lbPeriodInfo"></div>
-    <div class="row2" style="margin-top:16px;">
-      <div>
-        <label for="topN">Number of entries (top N)</label>
-        <input type="text" id="topN" value="3" placeholder="3" />
-      </div>
-    </div>
-    <label>Hologram Location <span style="color:var(--muted);font-weight:400">(Welt ist immer <code>world</code>)</span></label>
-    <div class="loc-row">
-      <div><span class="loc-label">X</span><input type="text" id="locX" placeholder="-1571.25" /></div>
-      <div><span class="loc-label">Y</span><input type="text" id="locY" placeholder="228.3" /></div>
-      <div><span class="loc-label">Z</span><input type="text" id="locZ" placeholder="1440.75" /></div>
+    <div class="info-box" style="margin-top:16px;">
+      <strong>Zeitraum: Wöchentlich (fest)</strong> — Zurücksetzen jeden <strong>Sonntag um Mitternacht (00:00 Serverzeit)</strong>.<br>
+      Das ist der allererste Moment des Sonntags — also wenn die Samstagnacht in den Sonntag übergeht. Die Woche läuft damit von <strong>Sonntag 00:00</strong> bis <strong>Samstag 23:59</strong>.<br>
+      Es werden immer die <strong>Top 3</strong> angezeigt. Hologramm-Position: <code>world:-3967.500:227.600:1924.500</code>
     </div>
   </div>
 
@@ -309,8 +292,8 @@
     <input type="text" id="cgDescInput" placeholder="e.g. Mine 20,000 Oak Logs together!" value="Mine 20,000 Oak Logs together!" />
     <label for="cgGoalValue">Goal value (target number)</label>
     <input type="text" id="cgGoalValue" placeholder="e.g. 20000" value="20000" />
-    <label>Time period</label>
-    <div class="period-pills" id="cgPills">
+    <label>Zeitraum <span style="color:var(--muted);font-weight:400">(siehe Hinweis)</span></label>
+    <div class="period-pills" id="cgPills" style="opacity:0.45;pointer-events:none;">
       <span class="period-pill active" data-period="alltime">All Time</span>
       <span class="period-pill" data-period="weekly">Weekly</span>
       <span class="period-pill" data-period="daily">Daily</span>
@@ -319,12 +302,14 @@
       <span class="period-pill" data-period="yearly">Yearly</span>
     </div>
     <div class="period-info" id="cgPeriodInfo"></div>
+    <div class="warn-box" style="margin-top:8px;">Nur relevant, wenn derselbe Placeholder bereits mit einem anderen Zeitraum als Board registriert wurde. Das Tracking startet ab dem Zeitpunkt, an dem das Board erstmals erstellt wird — für ein neues Community-Ziel ist daher <strong>All Time</strong> korrekt.</div>
     <label>Hologram Location <span style="color:var(--muted);font-weight:400">(Welt ist immer <code>world</code>)</span></label>
     <div class="loc-row">
-      <div><span class="loc-label">X</span><input type="text" id="cgLocX" placeholder="-1923.92" /></div>
-      <div><span class="loc-label">Y</span><input type="text" id="cgLocY" placeholder="64.0" /></div>
-      <div><span class="loc-label">Z</span><input type="text" id="cgLocZ" placeholder="-229.0" /></div>
+      <div><span class="loc-label">X</span><input type="text" id="cgLocX" placeholder="-3976.000" value="-3976.000" /></div>
+      <div><span class="loc-label">Y</span><input type="text" id="cgLocY" placeholder="225.500" value="225.500" /></div>
+      <div><span class="loc-label">Z</span><input type="text" id="cgLocZ" placeholder="1912.500" value="1912.500" /></div>
     </div>
+    <div class="info-box" style="margin-top:10px;"><strong>Hinweis:</strong> Diese Position liegt auf der Brücke, die erst erscheint, sobald das erste Community-Ziel erreicht wurde. Position nur dann aktualisieren, wenn das Hologramm neu positioniert werden muss.</div>
   </div>
 
   <div class="card">
@@ -500,17 +485,7 @@ function setPeriodInfo(infoEl, period) {
   infoEl.innerHTML = PERIOD_INFO[period] ?? '';
 }
 
-const lbPeriodInfo = document.getElementById('lbPeriodInfo');
-let selectedPeriod = 'weekly';
-setPeriodInfo(lbPeriodInfo, selectedPeriod);
-document.querySelectorAll('#lbPills .period-pill').forEach(pill => {
-  pill.addEventListener('click', () => {
-    document.querySelectorAll('#lbPills .period-pill').forEach(p => p.classList.remove('active'));
-    pill.classList.add('active');
-    selectedPeriod = pill.dataset.period;
-    setPeriodInfo(lbPeriodInfo, selectedPeriod);
-  });
-});
+const selectedPeriod = 'weekly';
 
 const cgPeriodInfo = document.getElementById('cgPeriodInfo');
 let selectedCGPeriod = 'alltime';
@@ -608,8 +583,8 @@ function generate() {
   const rawVal   = statSelect.value;
   const title    = document.getElementById('titleInput').value || 'Weekly Advancements';
   const category = document.getElementById('categoryInput').value || 'Most Mobs Killed';
-  const topN     = Math.max(1, parseInt(document.getElementById('topN').value) || 3);
-  const location = buildLocation('locX','locY','locZ');
+  const topN     = 3;
+  const location = 'world:-3967.500:227.600:1924.500';
   const output   = document.getElementById('output');
   const stepsEl  = document.getElementById('lbSteps');
 
@@ -646,7 +621,7 @@ function generate() {
   // Step 1 – Create shortcut file
   steps += `<div class="step">
     <div class="step-header"><span class="step-num">1</span> Shortcut-Datei erstellen</div>
-    <p>Erstelle die Datei <strong>/plugins/PlaceholderAPI/shortcuts/${shortcutName}.txt</strong> auf deinem Server und füge diesen Inhalt ein:</p>
+    <p>Erstelle die Datei <strong>/plugins/PlaceholderAPI/shortcuts/${shortcutName}.txt</strong> auf dem Server und füge diesen Inhalt ein:</p>
     ${codeBlock('lb-shortcut-content', shortcutContent)}
     <p style="margin-top:8px;">Danach PAPI neu laden:</p>
     ${codeBlock('lb-papi-reload', '/papi reload')}
@@ -661,8 +636,18 @@ function generate() {
 
   // Step 3 – Create hologram
   steps += `<div class="step">
-    <div class="step-header"><span class="step-num">3</span> Hologram erstellen (DecentHolograms)</div>
-    <p>Kopiere den YAML unten in deine DecentHolograms-Config. Oder erstelle ein Hologram mit <code>/dh create &lt;name&gt;</code> und ersetze dann den Inhalt mit dem generierten YAML.</p>
+    <div class="step-header"><span class="step-num">3</span> Hologram eintragen (DecentHolograms)</div>
+    <p>Kopiere den YAML-Code unten in die Datei <strong>plugins/DecentHolograms/holograms/weekly.yml</strong> auf dem Server und lade DecentHolograms danach neu:</p>
+    ${codeBlock('lb-dh-reload', '/dh reload')}
+  </div>`;
+
+  // Step 4 – NPC skin
+  const npcSkinCmd = `/npc skin %ajlb_lb_${boardRef}_1_weekly_name%`;
+  steps += `<div class="step">
+    <div class="step-header"><span class="step-num">4</span> NPC-Skin setzen</div>
+    <p>Schaue den NPC im Spiel an und tippe <code>/npc select</code> um ihn auszuwählen. Führe danach aus:</p>
+    ${codeBlock('lb-npc-skin', npcSkinCmd)}
+    <p style="margin-top:8px;">Der NPC-Skin wird damit automatisch auf den aktuellen wöchentlichen Platz-1-Spieler gesetzt.</p>
   </div>`;
 
   steps += `</div>`;
